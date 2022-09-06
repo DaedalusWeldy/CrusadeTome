@@ -31,18 +31,12 @@ class Unit:
         self.psychic_text = "Not a psychic"
         # unitStats follows the same sequence that 
         # official Warhammer 40k datasheets use
-        self.stats = {"move":0,"weapon_skill":0,
-                          "ballistic_skill":0,"strength":0,
-                          "toughness":0,"wounds":0, "attacks":0,
-                          "leadership":0,"save":0}
-        self.leader_stats = {"move":0,"weapon_skill":0,
-                          "ballistic_skill":0,"strength":0,
-                          "toughness":0,"wounds":0,"attacks":0,
-                          "leadership":0,"save":0}
-        self.weapon_list = []
+        self.model_list = []
+        self.wargear_list = []
         self.ability_list = []
         self.priest_list = []
         self.psychic_list = []
+        self.keywords_list = []
         self.crusade_trait_list = []
         self.crusade_xp = []
         self.battle_kills = {"ranged":0, "melee":0, "psychic":0}
@@ -53,30 +47,94 @@ class Unit:
     def loadUnitSQLData(self, unit_to_load):
         with sqlite3.connect(DB_PATH) as conn:
             conn.row_factory = sqlite3.Row
+            # Pulling raw info from Datasheets
             cursor = conn.execute("SELECT name, role, unit_composition, transport, priest, psyker, faction_id from Datasheets WHERE id=?", (unit_to_load,))
             result = cursor.fetchone()
-            self.name = result['name']
-            self.role = result['role']
-            self.composition = stripHTML(result['unit_composition'])
-            self.transport = result['transport']
-            self.priest_text = result['priest']
-            self.psychic_text = result['psyker']
-            self.faction = result['faction_id']
+            self.name = result["name"]
+            self.role = result["role"]
+            self.composition = stripHTML(result["unit_composition"])
+            self.transport = result["transport"]
+            if result["priest"] != "":
+                self.priest_text = stripHTML(result['priest'])
+            if result["psyker"] != "":
+                self.psychic_text = result["psyker"]
+            self.faction = result["faction_id"]
             print("Datasheets Data Loaded Successsfully")
-             # Pulling ability data
+            # Pulling ability pointer data
             cursor = conn.execute("SELECT line, ability_id, cost from Datasheets_abilities WHERE datasheet_id=?", (unit_to_load,))
             result = cursor.fetchall()
             for row in result:
-                tempItem = {'ability_id': row['ability_id'], 'cost':row['cost']}
+                tempItem = {"ability_id": row["ability_id"], "cost":row["cost"]}
                 self.ability_list.append(tempItem)
-            
+            # Pulling actual text of abilities 
             for entry in self.ability_list:
-                cursor = conn.execute("SELECT name, description from Abilities WHERE id=?", (entry['ability_id'],))
+                cursor = conn.execute("SELECT name, description from Abilities WHERE id=?", (entry["ability_id"],))
                 result = cursor.fetchone()
-                entry['name'] = result['name']
-                entry['description'] = stripHTML(result['description'])
-           
-        
+                entry["name"] = result["name"]
+                entry["description"] = stripHTML(result["description"])
+            # Pulling in unit keywords
+            cursor = conn.execute("SELECT keyword, model from Datasheets_keywords WHERE datasheet_id=?", (unit_to_load,))
+            result = cursor.fetchall()
+            for row in result:
+                if row["model"] != "":
+                    self.keywords_list.append('' + row["keyword"] + '(' + row["model"] + ')')
+                else:
+                    self.keywords_list.append(row["keyword"])
+            # Pulling stat values for each model in the unit
+            cursor = conn.execute("SELECT name, M, WS, BS, S, T, W, A, Ld, Sv, Cost, cost_description," +
+                "models_per_unit from Datasheets_models WHERE datasheet_id=?", (unit_to_load,))
+            result = cursor.fetchall()
+            for row in result:
+                model_input = {"model_name": row["name"],
+                    "model_M": row["M"], "model_WS": row["WS"],
+                    "model_BS": row["BS"], "model_S": row["S"],
+                    "model_T": row["T"], "model_W": row["W"],
+                    "model_A": row["A"], "model_Ld": row["Ld"],
+                    "model_Sv": row["Sv"]}
+                self.model_list.append(model_input)
+            # Pulling list of wargear for the unit
+            cursor = conn.execute("SELECT wargear_id, cost from Datasheets_wargear WHERE datasheet_id=?", (unit_to_load,))
+            result =cursor.fetchall()
+            for row in result:
+                wargear_input = {"wargear_id": row["wargear_id"],
+                                    "wargear_cost": row["cost"]}
+                self.wargear_list.append(wargear_input)
+            # Pulling data for each wargear piece
+            for entry in self.wargear_list:
+                cursor = conn.execute("SELECT name, type, description from Wargear WHERE id=?", (entry["wargear_id"],))
+                cursor2 = conn.execute("SELECT name, range, type, S, AP, D, abilities from Wargear_list WHERE wargear_id=?", (entry["wargear_id"],))
+                result = cursor.fetchone()
+                result2 = cursor2.fetchall()
+                entry["wargear_name"] = result["name"]
+                entry["wargear_type"] = result["type"]
+                entry["wargear_description"] = result["description"]
+                # If result2 is only one entry, add descriptions to existing list item
+                # Otherwise, add sub-gear below it on the list for each profile
+                if len(result2) == 1:
+                    entry["wargear_range"] = result2[0]["range"]
+                    entry["wargear_type"] = result2[0]["type"]
+                    entry["wargear_s"] = result2[0]["S"]
+                    entry["wargear_ap"] = result2[0]["AP"]
+                    entry["wargear_d"] = result2[0]["D"]
+                    entry["wargear_abilities"] = stripHTML(result2[0]["abilities"])
+                elif len(result2) >= 2:
+                    sub_entry = {"wargear_name":result2["name"], "wargear_type":result2["type"],
+                                    "wargear_s":result2["S"], "wargear_ap":result2["AP"],
+                                    "wargear_d":result2["d"], "wargear_abilities":result2["abilities"]}
+                    self.wargear_list.insert(self.wargear_list.index(entry) + 1, sub_entry)
+                else:
+                    print("ERROR: Incorrect wargear generation!")
+            # Pulling data for psyker abilities
+            if self.psychic_text != "No psychic powers":
+                cursor = conn.execute("SELECT roll, name, type, description from PsychicPowers WHERE type=?", (self.faction,))
+                result =cursor.fetchall()
+                for row in result:
+                    psychic_power = {"power_name": row["name"], "power_roll": row["roll"],
+                                    "power_type":row["type"], "power_description": stripHTML(row["description"])}
+                    self.psychic_list.append(psychic_power)
+            # Pulling data for priest abilities, once a datasheet exists 
+            # for them in the SQLite database.
+    
     
     # 'SaveToJSON' Appends the Unit to the end of a JSON file
     # def saveToJSON(self, file_path):
@@ -89,7 +147,7 @@ class Unit:
 print(DB_PATH)
 testUnit = Unit()
 
-testUnit.loadUnitSQLData("000000882")
+testUnit.loadUnitSQLData("000000005")
 print("The unit name is " + testUnit.name)
 print("The unit role is " + testUnit.role)
 print("The unit composition is " + testUnit.composition)
@@ -100,3 +158,15 @@ for entry in testUnit.ability_list:
     print("Ability ID: " + entry['ability_id'])
     print("Ability Cost: " + entry['cost'])
     print("Ability Description: " + entry['description'])
+
+for entry in testUnit.keywords_list:
+    print(entry + ',')
+
+for entry in testUnit.model_list:
+    print(entry)
+
+for entry in testUnit.psychic_list:
+    print(entry)
+
+for entry in testUnit.wargear_list:
+    print(entry)
