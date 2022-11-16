@@ -48,7 +48,7 @@ class Unit:
         self.crusade_xp = 0
         self.battle_kills = {"ranged":0, "melee":0, "psychic":0}
         self.total_kills = {"ranged":0, "melee":0, "psychic":0}
-        self.crusade_stats = {}
+        # self.crusade_stats = {}
 
     # Returns boolean value based on whether or not unit has a
     # particular keyword
@@ -111,6 +111,7 @@ class Unit:
                     "model_Sv": row["Sv"], "model_count": 0}
                 self.model_list.append(model_input)
             # Pulling list of wargear for the unit
+            temp_wargear_list = []
             cursor = conn.execute("SELECT wargear_id, cost from Datasheets_wargear WHERE datasheet_id=?", (unit_to_load,))
             result =cursor.fetchall()
             for row in result:
@@ -119,31 +120,39 @@ class Unit:
                 self.wargear_list.append(wargear_input)
             # Pulling data for each wargear piece
             for entry in self.wargear_list:
+                temp_wargear = entry
                 cursor = conn.execute("SELECT name, type, description from Wargear WHERE id=?", (entry["wargear_id"],))
                 cursor2 = conn.execute("SELECT name, range, type, S, AP, D, abilities from Wargear_list WHERE wargear_id=?", (entry["wargear_id"],))
                 result = cursor.fetchone()
                 result2 = cursor2.fetchall()
-                entry["wargear_name"] = result["name"]
-                entry["wargear_type"] = result["type"]
-                entry["wargear_description"] = result["description"]
+                temp_wargear["wargear_name"] = result["name"]
+                temp_wargear["wargear_type"] = result["type"]
+                temp_wargear["wargear_description"] = result["description"]
                 # If result2 is only one entry, add descriptions to existing list item
                 # Otherwise, add sub-gear below it on the list for each profile
                 if len(result2) == 1:
-                    entry["wargear_range"] = result2[0]["range"]
-                    entry["wargear_type"] = result2[0]["type"]
-                    entry["wargear_s"] = result2[0]["S"]
-                    entry["wargear_ap"] = result2[0]["AP"]
-                    entry["wargear_d"] = result2[0]["D"]
-                    entry["wargear_abilities"] = stripHTML(result2[0]["abilities"])
-                    entry["is_active"] = False
-                elif len(result2) >= 2:
-                    sub_entry = {"wargear_name":result2["name"], "wargear_type":result2["type"],
-                                    "wargear_s":result2["S"], "wargear_ap":result2["AP"],
-                                    "wargear_d":result2["d"], "wargear_abilities":result2["abilities"],
+                    print("Length is 1")
+                    temp_wargear["wargear_range"] = result2[0]["range"]
+                    temp_wargear["wargear_type"] = result2[0]["type"]
+                    temp_wargear["wargear_s"] = result2[0]["S"]
+                    temp_wargear["wargear_ap"] = result2[0]["AP"]
+                    temp_wargear["wargear_d"] = result2[0]["D"]
+                    temp_wargear["wargear_abilities"] = stripHTML(result2[0]["abilities"])
+                    temp_wargear["is_active"] = False
+                    temp_wargear_list.append(temp_wargear)
+                elif len(result2) > 1:
+                    temp_wargear_list.append(temp_wargear)
+                    for sub_entry in result2:
+                        shot_type = {"wargear_name":sub_entry["name"], "wargear_type":sub_entry["type"],
+                                    "wargear_s":sub_entry["S"], "wargear_ap":sub_entry["AP"],
+                                    "wargear_d":sub_entry["d"], "wargear_abilities":stripHTML(sub_entry["abilities"]),
                                     "is_active": False}
-                    self.wargear_list.insert(self.wargear_list.index(entry) + 1, sub_entry)
+                        temp_wargear_list.append(shot_type)
                 else:
                     print("ERROR: Incorrect wargear generation!")
+            # Apply the new, complete list of wargear, overwriting the current one
+            self.wargear_list = temp_wargear_list
+            
             # Pulling data for psyker abilities
             if self.psychic_text != "No psychic powers":
                 cursor = conn.execute("SELECT roll, name, type, description from PsychicPowers WHERE type=?", (self.faction,))
@@ -153,30 +162,46 @@ class Unit:
                                     "power_type":row["type"], "power_description": stripHTML(row["description"]),
                                     "is_active": False}
                     self.psychic_list.append(psychic_power)
-            # Pulling data for priest abilities, once a datasheet exists 
-            # for them in the SQLite database.
 
             # Each set of crusade traits is associated with one or two keywords.
             # Find all lists for your faction that match this unit's keywords
             # and add them to the unit's 'crusade_trait_list'
             # Entries will be added as dictionaries
-            """
-            cursor = conn.execute("SELECT type, keyword1, keyword2, dice_num, trait_name, trait_text WHERE faction=?", (self.faction,))
-            result = cursor.fetchall()
-            for row in result:
-                if self.hasKeyword(row["keyword1"]) and row["keyword2"] == "":
-                    trait_to_add = {"name":row["trait_name"], "type":row["type"], 
-                                    "text":row["trait_text"], "is_active":False}
-                    self.crusade_trait_list.add(trait_to_add)
-                elif self.hasKeyword(row["keyword1"]) and self.hasKeyword(row["keyword2"]):
-                    trait_to_add = {"name":row["trait_name"], "type":row["type"], 
-                                    "text":row["trait_text"], "is_active":False}
-                    self.crusade_trait_list.add(trait_to_add)
-            """        
+                 
                     
+    # END of 'loadUnitSQLData' method
+    
+    #Print unit data to console; only for testing purposes
+    def printUnit(self):
+        print("The unit name is " + self.name)
+        print("The unit role is " + self.role)
+        print("The unit composition is " + self.composition)
+        
+        if self.transport != "":
+            print("The unit transport is " + self.transport)
+        else:
+            print("This unit is not a transport.")
+
+        for entry in self.ability_list:
+            print("Ability Name: " + entry['name'])
+            print("Ability ID: " + entry['ability_id'])
+            print("Ability Cost: " + entry['cost'])
+            print("Ability Description: " + entry['description'])
+
+        for entry in self.keywords_list:
+            print(entry + ',')
+
+        for entry in self.model_list:
+            print(entry)
+
+        for entry in self.psychic_list:
+            print(entry)
+
+        for entry in self.wargear_list:
+            print(entry)
+    # END of 'printUnit' method
 
 
-            # END of 'loadUnitSQLData' method
 # END of 'Unit' definition
 
 class Roster:
@@ -215,8 +240,15 @@ class Roster:
         JSON_to_output = json.dumps(self)
         return JSON_to_output
 
-    # Add Unit object to unit_list
-    def addUnit(self, unit_to_add):
+    # Add a new unit to the roster who's id number matches
+    # the provided one.
+    def addNewUnit(self, unit_id):
+        unit_to_add = Unit()
+        unit_to_add.loadUnitSQLData(unit_id)
+        self.unit_list.append(unit_to_add)
+
+    # Add an existing Unit object to unit_list
+    def addExistingUnit(self, unit_to_add):
         if self.findUnit(unit_to_add["name"]) == False:
             self.unit_list.append(unit_to_add)
             self.roster_power += unit_to_add["power_level"]
@@ -233,6 +265,7 @@ class Roster:
             for x in self.unit_list:
                 if x["unit_title"] == unit_to_remove:
                     self.unit_list.remove(x)
+
 # END of 'Roster' definition
 
 
@@ -240,27 +273,15 @@ class Roster:
 # Testing section; to be cleared upon implementation of integrated testing 
 print(DB_PATH)
 testUnit = Unit()
+testRoster = Roster()
 
-testUnit.loadUnitSQLData("000002521")
-print("The unit name is " + testUnit.name)
-print("The unit role is " + testUnit.role)
-print("The unit composition is " + testUnit.composition)
-print("The unit transport is " + testUnit.transport)
+testRoster.roster_name = "Test roster"
+testRoster.roster_faction = "Adeptus Custodes"
+testRoster.roster_owner = "Kitten"
+testRoster.addNewUnit("000002521")
+testRoster.addNewUnit("000001680")
+testRoster.addNewUnit("000001560")
 
-for entry in testUnit.ability_list:
-    print("Ability Name: " + entry['name'])
-    print("Ability ID: " + entry['ability_id'])
-    print("Ability Cost: " + entry['cost'])
-    print("Ability Description: " + entry['description'])
-
-for entry in testUnit.keywords_list:
-    print(entry + ',')
-
-for entry in testUnit.model_list:
-    print(entry)
-
-for entry in testUnit.psychic_list:
-    print(entry)
-
-for entry in testUnit.wargear_list:
-    print(entry)
+testRoster.unit_list[0].printUnit()
+testRoster.unit_list[1].printUnit()
+testRoster.unit_list[2].printUnit()
