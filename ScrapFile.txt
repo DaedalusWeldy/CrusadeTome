@@ -45,3 +45,78 @@ sub_entry = {"wargear_name":result2[line_num]["name"], "wargear_type":result2[li
                                     "wargear_s":result2[line_num]["S"], "wargear_ap":result2[line_num]["AP"],
                                     "wargear_d":result2[line_num]["d"], "wargear_abilities":result2[line_num]["abilities"],
                                     "is_active": False, "line_num": line_num}
+
+
+print(DB_PATH)
+testUnit = Unit()
+testRoster = Roster()
+
+testRoster.roster_name = "Test roster"
+testRoster.roster_faction = "Adeptus Custodes"
+testRoster.roster_owner = "Kitten"
+testRoster.addNewUnit("000002521")
+testRoster.addNewUnit("000001680")
+testRoster.addNewUnit("000001560")
+
+testRoster.unit_list[0].printUnit()
+testRoster.unit_list[1].printUnit()
+testRoster.unit_list[2].printUnit()
+
+
+
+        output_dict["unit_title"] = self.unit_title
+        output_dict["name"] = self.name
+        output_dict["faction"] = self.faction
+        output_dict["count"] = self.count
+        output_dict["power_level"] = self.power_level
+        output_dict["leader_name"] = self.leader_name
+        output_dict["role"] = self.role
+        output_dict["composition"] = self.composition
+        output_dict["transport"] = self.transport
+        output_dict["chosen_power_text"] = self.chosen_power_text
+        output_dict["psychic_text"] = self.psychic_text
+        output_dict["model_list"] = self.model_list
+        output_dict["wargear_list"] = self.wargear_list
+        output_dict["ability_list"] = self.ability_list
+        output_dict["chosen_trait_list"] = self.chosen_trait_list
+        output_dict["psychic_list"] = self.psychic_list
+        output_dict["keywords_list"] = self.keywords_list
+        output_dict["crusade_trait_list"] = self.crusade_trait_list
+        output_dict["crusade_points"] = self.crusade_points
+        output_dict["crusade_xp"] = self.crusade_xp
+        output_dict["battle_kills"] = self.battle_kills
+        output_dict["total_kills"] = self.total_kills
+
+
+        temp_roster = UnitAndRoster.Roster()
+        temp_roster.roster_name = temp_JSON["roster_name"]
+        temp_roster.roster_faction = temp_JSON["roster_faction"]
+        temp_roster.roster_owner = temp_JSON["roster_owner"]
+        temp_roster.roster_power = temp_JSON["roster_power"]
+        temp_roster.roster_battles_total = temp_JSON["roster_battles_total"]
+        temp_roster.roster_battles_won = temp_JSON["roster_battles_won"]
+        temp_roster.roster_req_points = temp_JSON["roster_req_points"]
+        temp_roster.roster_supply_limit = temp_JSON["roster_supply_limit"]
+        temp_roster.roster_supply_used = temp_JSON["roster_supply_used"]
+        for entry in temp_JSON["unit_list"]:
+            temp_unit = UnitAndRoster.Unit()
+            temp_unit.loadFromDict(entry)
+            temp_roster["unit_list"].append(temp_unit)
+        temp_roster.roster_notes = temp_JSON["roster_notes"]
+        temp_roster.crusade_data = temp_JSON["crusade_data"]
+
+
+        temp_JSON = {}
+        temp_JSON["roster_name"] = active_roster.roster_name
+        temp_JSON["roster_faction"] = active_roster.roster_faction
+        temp_JSON["roster_owner"] = active_roster.roster_owner
+        temp_JSON["roster_power"] = active_roster.roster_power
+        temp_JSON["roster_battles_total"] = active_roster.roster_battles_total
+        temp_JSON["roster_battles_won"] = active_roster.roster_battles_won
+        temp_JSON["roster_req_points"] = active_roster.roster_req_points
+        temp_JSON["roster_supply_limit"] = active_roster.roster_supply_limit
+        temp_JSON["roster_supply_used"] = active_roster.roster_supply_used
+        for entry in active_roster.unit_list:
+            temp_JSON["unit_list"].append(entry.convertToDict())
+        temp_JSON["roster_notes"] = active_roster.roster_notes
+        temp_JSON["crusade_data"] = active_roster.crusade_data
