@@ -77,7 +77,7 @@ class Unit:
             if result["psyker"] != "":
                 self.psychic_text = result["psyker"]
             self.faction = result["faction_id"]
-            print("Datasheets Data Loaded Successsfully")
+            # TEST print("Datasheets Data Loaded Successsfully")
             # Pulling ability pointer data
             cursor = conn.execute("SELECT line, ability_id, cost from Datasheets_abilities WHERE datasheet_id=?", (unit_to_load,))
             result = cursor.fetchall()
@@ -131,7 +131,7 @@ class Unit:
                 # If result2 is only one entry, add descriptions to existing list item
                 # Otherwise, add sub-gear below it on the list for each profile
                 if len(result2) == 1:
-                    print("Length is 1")
+                    # TEST print("Length is 1")
                     temp_wargear["wargear_range"] = result2[0]["range"]
                     temp_wargear["wargear_type"] = result2[0]["type"]
                     temp_wargear["wargear_s"] = result2[0]["S"]
@@ -170,7 +170,40 @@ class Unit:
                  
                     
     # END of 'loadUnitSQLData' method
-    
+
+    # load data from a dictionary, which is how units are stored
+    # in a JSON file. Dictionaries will ONLY be pulled from said
+    # JSON rosters.
+    def loadFromDict(self, input_dict):
+        self.unit_title = input_dict["unit_title"]
+        self.name = input_dict["name"]
+        self.faction = input_dict["faction"]
+        self.count = input_dict["count"]
+        self.power_level = input_dict["power_level"]
+        self.leader_name = input_dict["leader_name"]
+        self.role = input_dict["role"]
+        self.composition = input_dict["composition"]
+        self.transport = input_dict["transport"]
+        self.chosen_power_text = input_dict["chosen_power_text"]
+        self.psychic_text = input_dict["psychic_text"]
+        self.model_list = input_dict["model_list"]
+        self.wargear_list = input_dict["wargear_list"]
+        self.ability_list = input_dict["ability_list"]
+        self.chosen_trait_list = input_dict["chosen_trait_list"]
+        self.psychic_list = input_dict["psychic_list"]
+        self.keywords_list = input_dict["keywords_list"]
+        self.crusade_trait_list = input_dict["crusade_trait_list"]
+        self.crusade_points = input_dict["crusade_points"]
+        self.crusade_xp = input_dict["crusade_xp"]
+        self.battle_kills = input_dict["battle_kills"]
+        self.total_kills = input_dict["total_kills"]
+    # END of 'loadFromDict' method
+
+    # Convert Unit to a dictionary file, then return the dictionary
+    def convertToDict(self):
+        output_dict = self.__dict__
+        return output_dict
+
     #Print unit data to console; only for testing purposes
     def printUnit(self):
         print("The unit name is " + self.name)
@@ -178,7 +211,7 @@ class Unit:
         print("The unit composition is " + self.composition)
         
         if self.transport != "":
-            print("The unit transport is " + self.transport)
+            print("The unit's transport rule is as follows:" + self.transport)
         else:
             print("This unit is not a transport.")
 
@@ -206,12 +239,19 @@ class Unit:
 
 class Roster:
     def __init__(self):
-        self.roster_name = "Roster name"
-        self.roster_faction = "Faction"
-        self.roster_owner = "Player name"
+        self.roster_name = ""
+        self.roster_faction = ""
+        self.roster_owner = ""
         self.roster_power = 0
+        self.roster_battles_total = 0
+        self.roster_battles_won = 0
+        self.roster_req_points = 0
+        self.roster_supply_limit = 0
+        self.roster_supply_used = 0
         # unit_list is a list of Unit objects, as defined above.
         self.unit_list = []
+        # General crusade text for the roster, written and saved by the user
+        self.roster_notes = ""
         # Contents of crusade_data will vary wildly from faction to faction,
         # as rules for Crusade mode are different for each faction in the game. 
         self.crusade_data = {}
@@ -232,12 +272,40 @@ class Roster:
         self.roster_faction = JSON_to_load["roster_faction"]
         self.roster_owner = JSON_to_load["roster_owner"]
         self.roster_power = JSON_to_load["roster_power"]
-        self.unit_list = JSON_to_load["unit_list"]
+        self.roster_battles_total = JSON_to_load["roster_battles_total"]
+        self.roster_battles_won = JSON_to_load["roster_battles_won"]
+        self.roster_req_points = JSON_to_load["roster_req_points"]
+        self.roster_supply_limit = JSON_to_load["roster_supply_limit"]
+        self.roster_supply_used = JSON_to_load["roster_supply_used"]
+        for entry in JSON_to_load["unit_list"]:
+            temp_unit = Unit()
+            temp_unit.loadFromDict(entry)
+            self.unit_list.append(temp_unit)
+        self.roster_notes = JSON_to_load["roster_notes"]
         self.crusade_data = JSON_to_load["crusade_data"]
 
-    # Convert a roster to JSON format and return it
-    def outputRosterJSON(self):
-        JSON_to_output = json.dumps(self)
+    # Convert a roster to Dict format and return it
+    # The method in main.py will call this during 
+    # the Json serialization
+    def outputRosterDict(self):
+        JSON_to_output = {}
+        JSON_to_output["roster_name"] = self.roster_name
+        JSON_to_output["roster_faction"] = self.roster_faction
+        JSON_to_output["roster_owner"] = self.roster_owner
+        JSON_to_output["roster_power"] = self.roster_power
+        JSON_to_output["roster_battles_total"] = self.roster_battles_total
+        JSON_to_output["roster_battles_won"] = self.roster_battles_won
+        JSON_to_output["roster_req_points"] = self.roster_req_points
+        JSON_to_output["roster_supply_limit"] = self.roster_supply_limit
+        JSON_to_output["roster_supply_used"] = self.roster_supply_used
+        # Make an empty list, to be immediately filled with units
+        JSON_to_output["unit_list"] = []
+        for entry in self.unit_list:
+            temp_unit_JSON = {}
+            temp_unit_JSON = entry.convertToDict()
+            JSON_to_output["unit_list"].append(temp_unit_JSON)
+        JSON_to_output["roster_notes"] = self.roster_notes
+        JSON_to_output["crusade_data"] = self.crusade_data
         return JSON_to_output
 
     # Add a new unit to the roster who's id number matches
@@ -270,10 +338,14 @@ class Roster:
 
 
 
-# Testing section; to be cleared upon implementation of integrated testing 
+# Testing section from this point forward; all sections below
+# to be cleared upon implementation of integrated testing 
+
 print(DB_PATH)
 testUnit = Unit()
 testRoster = Roster()
+testRoster2 = Roster()
+file_path = "testRoster.json"
 
 testRoster.roster_name = "Test roster"
 testRoster.roster_faction = "Adeptus Custodes"
@@ -282,6 +354,14 @@ testRoster.addNewUnit("000002521")
 testRoster.addNewUnit("000001680")
 testRoster.addNewUnit("000001560")
 
-testRoster.unit_list[0].printUnit()
-testRoster.unit_list[1].printUnit()
-testRoster.unit_list[2].printUnit()
+
+with open("testRoster.ros", 'w') as file_output:
+    json.dump(testRoster.outputRosterDict(), file_output)
+    # json.dumps(testRoster, file_output)
+
+if os.path.exists(file_path) == True:
+    with open(file_path, 'r') as file_input:
+        input_JSON = json.load(file_input)
+        testRoster2.loadRosterFromJSON(input_JSON)
+
+testRoster2.unit_list[0].printUnit()
