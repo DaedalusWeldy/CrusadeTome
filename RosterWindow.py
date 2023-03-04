@@ -59,6 +59,7 @@ class RosterWindow(QMainWindow):
         self.load_roster_action.triggered.connect(self.loadRosterProcess)
         self.save_roster_action.triggered.connect(self.saveRosterToJSONFile)
         self.add_unit_button.clicked.connect(self.addUnitProcess)
+        self.remove_unit_button.clicked.connect(self.removeUnitProcess)
 
         self.active_roster = Roster()
         self.show()
@@ -97,8 +98,8 @@ class RosterWindow(QMainWindow):
         for entry in self.active_roster.unit_list:
             # TO DO: Need to change last item in each getItem to a 'QTableWidgetItem' object
             self.unit_list_table.setItem(current_row, 0, QTableWidgetItem(entry.name))
-            self.unit_list_table.setItem(current_row, 1, QTableWidgetItem(entry.power_level))
-            self.unit_list_table.setItem(current_row, 2, QTableWidgetItem(entry.crusade_points))
+            self.unit_list_table.setItem(current_row, 1, QTableWidgetItem(str(entry.power_level)))
+            self.unit_list_table.setItem(current_row, 2, QTableWidgetItem(str(entry.crusade_points)))
             current_row += 1
         self.notes_text.text = self.active_roster.roster_notes
             
@@ -145,25 +146,43 @@ class RosterWindow(QMainWindow):
                 json.dumps(temp_JSON, file_output)
         # Testing to follow
 
+    # The successive series of methods to call when loading a roster 
+    # from a file.
     def loadRosterProcess(self):
         self.loadRosterFromJSONFile()
         self.clearFields()
         self.updateFields()
 
-    # TO DO: Figure out why this opens two concurrent dialogs
     def addUnitProcess(self):
         add_unit_diag = AddUnitDialog()
         if add_unit_diag.exec():
+            # TEST
+            print(add_unit_diag.unit_select_combo.count())
+            print(add_unit_diag.unit_select_combo.currentIndex())
+            print(add_unit_diag.unit_select_combo.currentText())
+            print(len(add_unit_diag.available_units))
+            # END OF TEST
             unit_to_add = add_unit_diag.available_units[add_unit_diag.unit_select_combo.currentIndex()]
             unit_to_add.crusade_points = 0
             # Takes the 'current_index' number from the currently selected unit, then 
             # adds the Unit object from 'avaialble_units' with the same index number.
             self.active_roster.unit_list.append(unit_to_add)
             # TEST
-            unit_to_add.printUnit()
+            # unit_to_add.printUnit()
             self.updateFields()
         else:
             print("No unit added")
+
+    # remove a unit from the "active_roster" list
+    def removeUnitProcess(self):
+        # Remove the unit from the 'unit_list' list
+        self.active_roster.unit_list.pop(self.unit_list_table.currentRow())
+        # Remove unit from the unit_list_table and refresh the content
+        self.unit_list_table.removeRow(self.unit_list_table.currentRow())
+        self.unit_list_table.clearContents()
+        self.updateFields()
+
+
 
 # END of 'MainUI' class
 

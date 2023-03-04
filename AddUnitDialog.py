@@ -29,7 +29,7 @@ class AddUnitDialog(QDialog):
         # List object of the available units from your faction
         self.updateFactionCombo()
         self.available_units = []
-        self.exec()
+        # TEST self.exec()
 
     # TO DO
     # Fill out faction_select_combo with a list of all of the 
@@ -38,6 +38,7 @@ class AddUnitDialog(QDialog):
         for entry in self.unit_loader.fetchFactionList():
             faction_string = "" + entry["id"] + " - " + entry["name"]
             self.faction_select_combo.addItem(faction_string)
+        self.faction_select_combo.setCurrentIndex(0)
 
     # Update the list of available units with all of the units for
     # the selected faction 
@@ -47,7 +48,9 @@ class AddUnitDialog(QDialog):
         # Get the faction ID from the first two (or three) letters of 
         # the "faction_combo_box" text
         current_selection = self.faction_select_combo.currentText()
+        # TEST
         print(current_selection)
+
         if current_selection[2] == " ":
             faction_id = self.faction_select_combo.currentText()[:2]
         else:
@@ -59,6 +62,7 @@ class AddUnitDialog(QDialog):
         for entry in self.available_units:
             self.unit_select_combo.addItem(str(entry.name))
         self.unit_select_combo.setCurrentIndex(0)
+        
 
     # TO DO
     # Method that will add the selected unit to the current Roster's 

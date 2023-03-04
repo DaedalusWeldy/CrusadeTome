@@ -155,6 +155,12 @@ class SQLFetcher:
     # two-or-three-letter faction ID
     def fetchFactionList(self):
         faction_list = []
+        
+        # TEST
+        # Coconut.jpg: without a fake entry on the first entry of the faction list,
+        # the first faction listed does not work.
+        # faction_list.append({"id":"TST", "name":"Enter a faction..."})
+        
         cursor = self.conn.execute("SELECT id, name from Factions", ())
         result = cursor.fetchall()
         for entry in result:
