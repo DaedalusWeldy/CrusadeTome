@@ -1,0 +1,12 @@
+<RCC>
+  <qresource prefix="newPrefix">
+    <file>Icons/fullscreen.png</file>
+    <file>Icons/minimize.png</file>
+    <file>Icons/insert.png</file>
+    <file>Icons/menu.png</file>
+    <file>Icons/quit.png</file>
+    <file>Icons/loadFile.png</file>
+    <file>Icons/newFile.png</file>
+    <file>Icons/saveFile.png</file>
+  </qresource>
+</RCC>
