@@ -1,3 +1,5 @@
-# Ignore venv
-venv/
-./ScrapFile.txt
+/venv
+/Backups
+/Icons
+scrap.txt
+__pycache__
