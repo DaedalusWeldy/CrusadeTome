@@ -41,6 +41,9 @@ A project by Daniel Weldy
 
 ## Version History
 
+* 0.35 (April 27, 2023)
+  * Added ability to save/load roster
+  * Minor UI quality updates
 * 0.31(April 24, 2023)
   * Readme uploaded
 * 0.3 (April 21, 2023)
