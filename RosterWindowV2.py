@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(901, 762)
+        MainWindow.resize(1080, 762)
         MainWindow.setStyleSheet("* {\n"
 "    border: none;\n"
 "    background-color: transparent;\n"
@@ -124,6 +124,17 @@ class Ui_MainWindow(object):
 "    background-color:#9a3232;\n"
 "    color: white;\n"
 "}\n"
+"\n"
+"QComboBox {\n"
+"    background-color: #D3D3D3;\n"
+"    color: black;\n"
+"}\n"
+"\n"
+"QComboBox ::hover {\n"
+"    background-color: #4d1919;\n"
+"    color: white;\n"
+"}\n"
+"\n"
 "\n"
 "QTabWidget::pane {\n"
 "    border-bottom-style: solid;\n"
@@ -369,6 +380,7 @@ class Ui_MainWindow(object):
         self.roster_name_line = QtWidgets.QLineEdit(self.top_data_frame)
         self.roster_name_line.setMinimumSize(QtCore.QSize(180, 20))
         self.roster_name_line.setMaximumSize(QtCore.QSize(220, 20))
+        self.roster_name_line.setMaxLength(255)
         self.roster_name_line.setObjectName("roster_name_line")
         self.gridLayout_2.addWidget(self.roster_name_line, 0, 1, 1, 1)
         self.total_battles_label = QtWidgets.QLabel(self.top_data_frame)
@@ -378,6 +390,7 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addWidget(self.total_battles_label, 0, 2, 1, 1)
         self.total_battles_line = QtWidgets.QLineEdit(self.top_data_frame)
         self.total_battles_line.setMaximumSize(QtCore.QSize(50, 20))
+        self.total_battles_line.setMaxLength(3)
         self.total_battles_line.setObjectName("total_battles_line")
         self.gridLayout_2.addWidget(self.total_battles_line, 0, 3, 1, 1)
         self.roster_faction_label = QtWidgets.QLabel(self.top_data_frame)
@@ -388,6 +401,7 @@ class Ui_MainWindow(object):
         self.roster_faction_line = QtWidgets.QLineEdit(self.top_data_frame)
         self.roster_faction_line.setMinimumSize(QtCore.QSize(180, 20))
         self.roster_faction_line.setMaximumSize(QtCore.QSize(220, 20))
+        self.roster_faction_line.setMaxLength(255)
         self.roster_faction_line.setObjectName("roster_faction_line")
         self.gridLayout_2.addWidget(self.roster_faction_line, 1, 1, 1, 1)
         self.battles_won_label = QtWidgets.QLabel(self.top_data_frame)
@@ -397,6 +411,7 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addWidget(self.battles_won_label, 1, 2, 1, 1)
         self.battles_won_line = QtWidgets.QLineEdit(self.top_data_frame)
         self.battles_won_line.setMaximumSize(QtCore.QSize(50, 20))
+        self.battles_won_line.setMaxLength(3)
         self.battles_won_line.setObjectName("battles_won_line")
         self.gridLayout_2.addWidget(self.battles_won_line, 1, 3, 1, 1)
         self.roster_owner_label = QtWidgets.QLabel(self.top_data_frame)
@@ -407,6 +422,7 @@ class Ui_MainWindow(object):
         self.roster_owner_line = QtWidgets.QLineEdit(self.top_data_frame)
         self.roster_owner_line.setMinimumSize(QtCore.QSize(180, 20))
         self.roster_owner_line.setMaximumSize(QtCore.QSize(220, 20))
+        self.roster_owner_line.setMaxLength(255)
         self.roster_owner_line.setObjectName("roster_owner_line")
         self.gridLayout_2.addWidget(self.roster_owner_line, 2, 1, 1, 1)
         self.verticalLayout_8.addWidget(self.top_data_frame, 0, QtCore.Qt.AlignHCenter)
@@ -424,6 +440,7 @@ class Ui_MainWindow(object):
         self.req_points_line = QtWidgets.QLineEdit(self.req_data_frame)
         self.req_points_line.setMinimumSize(QtCore.QSize(30, 20))
         self.req_points_line.setMaximumSize(QtCore.QSize(50, 20))
+        self.req_points_line.setMaxLength(3)
         self.req_points_line.setObjectName("req_points_line")
         self.horizontalLayout_7.addWidget(self.req_points_line)
         spacerItem3 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -436,6 +453,7 @@ class Ui_MainWindow(object):
         self.supply_limit_line.setMinimumSize(QtCore.QSize(30, 20))
         self.supply_limit_line.setMaximumSize(QtCore.QSize(50, 20))
         self.supply_limit_line.setText("")
+        self.supply_limit_line.setMaxLength(3)
         self.supply_limit_line.setObjectName("supply_limit_line")
         self.horizontalLayout_7.addWidget(self.supply_limit_line)
         spacerItem4 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -447,10 +465,12 @@ class Ui_MainWindow(object):
         self.supply_used_line = QtWidgets.QLineEdit(self.req_data_frame)
         self.supply_used_line.setMinimumSize(QtCore.QSize(30, 20))
         self.supply_used_line.setMaximumSize(QtCore.QSize(50, 20))
+        self.supply_used_line.setMaxLength(3)
         self.supply_used_line.setObjectName("supply_used_line")
         self.horizontalLayout_7.addWidget(self.supply_used_line)
         self.verticalLayout_8.addWidget(self.req_data_frame, 0, QtCore.Qt.AlignHCenter)
         self.unit_list_frame = QtWidgets.QFrame(self.roster_page)
+        self.unit_list_frame.setMinimumSize(QtCore.QSize(600, 0))
         self.unit_list_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.unit_list_frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.unit_list_frame.setObjectName("unit_list_frame")
@@ -492,7 +512,7 @@ class Ui_MainWindow(object):
         self.unit_list_table.horizontalHeader().setStretchLastSection(False)
         self.unit_list_table.verticalHeader().setCascadingSectionResizes(False)
         self.verticalLayout_10.addWidget(self.unit_list_table)
-        self.verticalLayout_8.addWidget(self.unit_list_frame)
+        self.verticalLayout_8.addWidget(self.unit_list_frame, 0, QtCore.Qt.AlignHCenter)
         self.unit_buttons_frame = QtWidgets.QFrame(self.roster_page)
         self.unit_buttons_frame.setMaximumSize(QtCore.QSize(900, 60))
         self.unit_buttons_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -511,8 +531,9 @@ class Ui_MainWindow(object):
         self.remove_unit_button.setMaximumSize(QtCore.QSize(120, 20))
         self.remove_unit_button.setObjectName("remove_unit_button")
         self.horizontalLayout_8.addWidget(self.remove_unit_button)
-        self.verticalLayout_8.addWidget(self.unit_buttons_frame)
+        self.verticalLayout_8.addWidget(self.unit_buttons_frame, 0, QtCore.Qt.AlignHCenter)
         self.crusade_notes_frame = QtWidgets.QFrame(self.roster_page)
+        self.crusade_notes_frame.setMinimumSize(QtCore.QSize(600, 0))
         self.crusade_notes_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.crusade_notes_frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.crusade_notes_frame.setObjectName("crusade_notes_frame")
@@ -523,10 +544,11 @@ class Ui_MainWindow(object):
         self.crusade_notes_label.setObjectName("crusade_notes_label")
         self.verticalLayout_9.addWidget(self.crusade_notes_label)
         self.crusade_notes_text = QtWidgets.QTextEdit(self.crusade_notes_frame)
+        self.crusade_notes_text.setMinimumSize(QtCore.QSize(0, 0))
         self.crusade_notes_text.setMaximumSize(QtCore.QSize(900, 16777215))
         self.crusade_notes_text.setObjectName("crusade_notes_text")
         self.verticalLayout_9.addWidget(self.crusade_notes_text)
-        self.verticalLayout_8.addWidget(self.crusade_notes_frame)
+        self.verticalLayout_8.addWidget(self.crusade_notes_frame, 0, QtCore.Qt.AlignHCenter)
         self.roster_and_unit_stack.addWidget(self.roster_page)
         self.unit_page = QtWidgets.QWidget()
         self.unit_page.setObjectName("unit_page")
@@ -866,7 +888,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "CrusadeTome (Pre-Alpha)"))
         self.main_menu_button.setText(_translate("MainWindow", "Menu"))
         self.new_roster_button.setText(_translate("MainWindow", "New Roster"))
         self.load_roster_button.setText(_translate("MainWindow", "Load Roster"))

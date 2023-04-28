@@ -99,4 +99,18 @@ class Roster:
                 if x["unit_title"] == unit_to_remove:
                     self.unit_list.remove(x)
 
+    def printRoster(self):
+        print(self.roster_name)
+        print(self.roster_faction)
+        print(self.roster_owner)
+        print(self.roster_power)
+        print(self.roster_battles_total)
+        print(self.roster_battles_won)
+        print(self.roster_req_points)
+        print(self.roster_supply_limit)
+        print(self.roster_supply_used)
+        print(self.unit_list)
+        print(self.roster_notes) 
+        print(self.crusade_data)
+
 # END of 'Roster' definition

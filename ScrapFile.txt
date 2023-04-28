@@ -1,3 +1,9 @@
+CURRENTLY WORKING ON:
+    1.adding either editingFinished() or textChanged() triggers for each line edit
+        a. Add writeToRoster() for each trigger used
+
+pyuic5 RosterWindowV2.ui -o RosterWindowV2.py
+
 cursor = conn.execute("SELECT wargear_id, cost from Datasheets_wargear WHERE datasheet_id=?", (unit_to_load,))
             result =cursor.fetchall()
             for row in result:
@@ -45,3 +51,24 @@ sub_entry = {"wargear_name":result2[line_num]["name"], "wargear_type":result2[li
                                     "wargear_s":result2[line_num]["S"], "wargear_ap":result2[line_num]["AP"],
                                     "wargear_d":result2[line_num]["d"], "wargear_abilities":result2[line_num]["abilities"],
                                     "is_active": False, "line_num": line_num}
+
+
+
+        load_dialog = QFileDialog(self)
+        load_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
+        load_dialog.setNameFilter("CrusadeTome roster files (*.ros)")
+        load_dialog.setDirectory("C:\\Users\%%current_user\\Documents")
+        load_dialog.setDefaultSuffix("ros")
+        load_dialog.setViewMode(QFileDialog.ViewMode.Detail)
+
+        self.active_roster.roster_name = self.ui.roster_name_line.text
+        self.active_roster.roster_faction = self.ui.roster_faction_line.text
+        self.active_roster.roster_owner = self.ui.roster_owner_line.text
+        self.active_roster.roster_battles_total = self.ui.total_battles_line.text
+        self.active_roster.roster_battles_won = self.ui.battles_won_line.text
+        self.active_roster.roster_req_points = self.ui.req_points_line.text
+        self.active_roster.roster_supply_limit = self.ui.supply_limit_line.text
+        self.active_roster.roster_supply_used = self.ui.supply_used_line.text
+        # No need to do units; by nature of how the addUnit method works,
+        # The unit list is updated with every unit added 
+        self.active_roster.roster_notes = self.ui.crusade_notes_text.text 

@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>901</width>
+    <width>1080</width>
     <height>762</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>CrusadeTome (Pre-Alpha)</string>
   </property>
   <property name="styleSheet">
    <string notr="true">* {
@@ -123,6 +123,17 @@
 	background-color:#9a3232;
 	color: white;
 }
+
+QComboBox {
+	background-color: #D3D3D3;
+	color: black;
+}
+
+QComboBox ::hover {
+	background-color: #4d1919;
+	color: white;
+}
+
 
 QTabWidget::pane {
 	border-bottom-style: solid;
@@ -750,6 +761,9 @@ border-color: black;
                   <height>20</height>
                  </size>
                 </property>
+                <property name="maxLength">
+                 <number>255</number>
+                </property>
                </widget>
               </item>
               <item row="0" column="2">
@@ -775,6 +789,9 @@ border-color: black;
                   <width>50</width>
                   <height>20</height>
                  </size>
+                </property>
+                <property name="maxLength">
+                 <number>3</number>
                 </property>
                </widget>
               </item>
@@ -808,6 +825,9 @@ border-color: black;
                   <height>20</height>
                  </size>
                 </property>
+                <property name="maxLength">
+                 <number>255</number>
+                </property>
                </widget>
               </item>
               <item row="1" column="2">
@@ -833,6 +853,9 @@ border-color: black;
                   <width>50</width>
                   <height>20</height>
                  </size>
+                </property>
+                <property name="maxLength">
+                 <number>3</number>
                 </property>
                </widget>
               </item>
@@ -865,6 +888,9 @@ border-color: black;
                   <width>220</width>
                   <height>20</height>
                  </size>
+                </property>
+                <property name="maxLength">
+                 <number>255</number>
                 </property>
                </widget>
               </item>
@@ -913,6 +939,9 @@ border-color: black;
                   <height>20</height>
                  </size>
                 </property>
+                <property name="maxLength">
+                 <number>3</number>
+                </property>
                </widget>
               </item>
               <item>
@@ -958,6 +987,9 @@ border-color: black;
                 <property name="text">
                  <string/>
                 </property>
+                <property name="maxLength">
+                 <number>3</number>
+                </property>
                </widget>
               </item>
               <item>
@@ -1000,13 +1032,22 @@ border-color: black;
                   <height>20</height>
                  </size>
                 </property>
+                <property name="maxLength">
+                 <number>3</number>
+                </property>
                </widget>
               </item>
              </layout>
             </widget>
            </item>
-           <item>
+           <item alignment="Qt::AlignHCenter">
             <widget class="QFrame" name="unit_list_frame">
+             <property name="minimumSize">
+              <size>
+               <width>600</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="frameShape">
               <enum>QFrame::StyledPanel</enum>
              </property>
@@ -1100,7 +1141,7 @@ border-color: black;
              </layout>
             </widget>
            </item>
-           <item>
+           <item alignment="Qt::AlignHCenter">
             <widget class="QFrame" name="unit_buttons_frame">
              <property name="maximumSize">
               <size>
@@ -1168,8 +1209,14 @@ border-color: black;
              </layout>
             </widget>
            </item>
-           <item>
+           <item alignment="Qt::AlignHCenter">
             <widget class="QFrame" name="crusade_notes_frame">
+             <property name="minimumSize">
+              <size>
+               <width>600</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="frameShape">
               <enum>QFrame::StyledPanel</enum>
              </property>
@@ -1192,6 +1239,12 @@ border-color: black;
               </item>
               <item>
                <widget class="QTextEdit" name="crusade_notes_text">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>900</width>
