@@ -1,58 +1,16 @@
 CURRENTLY WORKING ON:
-    1.adding either editingFinished() or textChanged() triggers for each line edit
-        a. Add writeToRoster() for each trigger used
+    * 'Remove Unit' button functionality
+      * addUnitToRoster and removeUnitFromRoster should be in Roster object, not main.py
+
+    * 'active_roster' units not clearing when "New Roster" selected
+      * Consequence of separating 'updateFields' and 'updateUnitList'?
+
+    * When user double-clicks on a unit, it takes them to the Unit page, where they can view the unit's stats and add-ons.
+      * Changes made to the unit's stats on that page must be saved on-the-fly, like the Roster LineEdits do
+    * Work on a way to have pre-set sizes for the columns in the Tables, both on Roster and on Unit side. 
+
 
 pyuic5 RosterWindowV2.ui -o RosterWindowV2.py
-
-cursor = conn.execute("SELECT wargear_id, cost from Datasheets_wargear WHERE datasheet_id=?", (unit_to_load,))
-            result =cursor.fetchall()
-            for row in result:
-                wargear_input = {"wargear_id": row["wargear_id"],
-                                    "wargear_cost": row["cost"]}
-                self.wargear_list.append(wargear_input)
-            # Pulling data for each wargear piece
-            for entry in self.wargear_list:
-                print("Entry is as follows:")
-                print(entry)
-                cursor = conn.execute("SELECT name, type, description from Wargear WHERE id=?", (entry["wargear_id"],))
-                cursor2 = conn.execute("SELECT name, range, type, S, AP, D, abilities from Wargear_list WHERE wargear_id=?", (entry["wargear_id"],))
-                result = cursor.fetchone()
-                result2 = cursor2.fetchall()
-                entry["wargear_name"] = result["name"]
-                entry["wargear_type"] = result["type"]
-                entry["wargear_description"] = result["description"]
-                # If result2 is only one entry, add descriptions to existing list item
-                # Otherwise, add sub-gear below it on the list for each profile
-                if len(result2) == 1:
-                    entry["wargear_range"] = result2[0]["range"]
-                    entry["wargear_type"] = result2[0]["type"]
-                    entry["wargear_s"] = result2[0]["S"]
-                    entry["wargear_ap"] = result2[0]["AP"]
-                    entry["wargear_d"] = result2[0]["D"]
-                    entry["wargear_abilities"] = stripHTML(result2[0]["abilities"])
-                    entry["is_active"] = False
-                elif len(result2) > 1:
-                    line_num = 0
-                    while line_num < len(result2):
-                        sub_entry = {"wargear_name":result2[line_num]["name"], "wargear_type":result2[line_num]["type"],
-                                    "wargear_s":result2[line_num]["S"], "wargear_ap":result2[line_num]["AP"],
-                                    "wargear_d":result2[line_num]["d"], "wargear_abilities":result2[line_num]["abilities"],
-                                    "is_active": False}
-                        self.wargear_list.insert(self.wargear_list.index(entry) + 1, sub_entry)
-                        line_num += 1
-                else:
-                    print("ERROR: Incorrect wargear generation!")
-
-
-
-
-
-sub_entry = {"wargear_name":result2[line_num]["name"], "wargear_type":result2[line_num]["type"],
-                                    "wargear_s":result2[line_num]["S"], "wargear_ap":result2[line_num]["AP"],
-                                    "wargear_d":result2[line_num]["d"], "wargear_abilities":result2[line_num]["abilities"],
-                                    "is_active": False, "line_num": line_num}
-
-
 
         load_dialog = QFileDialog(self)
         load_dialog.setFileMode(QFileDialog.FileMode.AnyFile)
@@ -72,3 +30,32 @@ sub_entry = {"wargear_name":result2[line_num]["name"], "wargear_type":result2[li
         # No need to do units; by nature of how the addUnit method works,
         # The unit list is updated with every unit added 
         self.active_roster.roster_notes = self.ui.crusade_notes_text.text 
+
+
+        def updateUnitList(self):
+        # Change the number of rows to match the number of units
+        # in the active roster's unit list.
+        self.ui.unit_list_table.clearContents()
+        self.ui.unit_list_table.setRowCount(len(self.active_roster.unit_list))
+        # Load each unit in the unit list
+        current_row = 0
+        for entry in self.active_roster.unit_list:
+            # TO DO: Need to change last item in each getItem to a 'QTableWidgetItem' object
+            self.ui.unit_list_table.setItem(current_row, 0, QTableWidgetItem(entry.name))
+            self.ui.unit_list_table.setItem(current_row, 1, QTableWidgetItem(entry.power_level))
+            self.ui.unit_list_table.setItem(current_row, 2, QTableWidgetItem(entry.crusade_points))
+            current_row += 1
+
+
+      # whenever any of the following line edits are changed on the Roster
+      # page, update the 'active_roster' object with the new values
+      self.ui.roster_name_line.editingFinished.connect(self.writeToRoster)
+      self.ui.roster_faction_line.editingFinished.connect(self.writeToRoster)
+      self.ui.roster_owner_line.editingFinished.connect(self.writeToRoster)
+      self.ui.total_battles_line.editingFinished.connect(self.writeToRoster)
+      self.ui.battles_won_line.editingFinished.connect(self.writeToRoster)
+      self.ui.req_points_line.editingFinished.connect(self.writeToRoster)
+      self.ui.supply_limit_line.editingFinished.connect(self.writeToRoster)
+      self.ui.supply_used_line.editingFinished.connect(self.writeToRoster)
+      # Though clunky, the TextEdit object only has a 'textChanged' signal
+      self.ui.crusade_notes_text.textChanged.connect(self.writeToRoster)

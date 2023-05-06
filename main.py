@@ -25,9 +25,10 @@ class MainWindow(QMainWindow):
         # Bind various functions to button clicks
         self.ui.main_menu_button.clicked.connect(self.toggleMainMenu)
         self.ui.add_unit_button.clicked.connect(self.showUnitSelectMenu)
+        self.ui.remove_unit_button.clicked.connect(self.removeUnitFromRoster)
         self.ui.close_add_unit_button.clicked.connect(self.hideUnitSelectMenu)
         self.ui.submit_unit_button.clicked.connect(self.addUnitToRoster)
-        self.ui.load_roster_button.clicked.connect(self.loadRosterProcess)
+        self.ui.load_roster_button.clicked.connect(self.loadRosterFromJSONFile)
         self.ui.save_roster_button.clicked.connect(self.saveRosterToJSONFile)
         self.ui.new_roster_button.clicked.connect(self.clearFields)
 
@@ -35,18 +36,7 @@ class MainWindow(QMainWindow):
         # 'faction_select_combo' is made  
         self.ui.faction_select_combo.currentIndexChanged.connect(self.updateAvailableUnitList)
 
-        # whenever any of the following line edits are changed on the Roster
-        # page, update the 'active_roster' object with the new values
-        self.ui.roster_name_line.editingFinished.connect(self.writeToRoster)
-        self.ui.roster_faction_line.editingFinished.connect(self.writeToRoster)
-        self.ui.roster_owner_line.editingFinished.connect(self.writeToRoster)
-        self.ui.total_battles_line.editingFinished.connect(self.writeToRoster)
-        self.ui.battles_won_line.editingFinished.connect(self.writeToRoster)
-        self.ui.req_points_line.editingFinished.connect(self.writeToRoster)
-        self.ui.supply_limit_line.editingFinished.connect(self.writeToRoster)
-        self.ui.supply_used_line.editingFinished.connect(self.writeToRoster)
-        # Though clunky, the TextEdit object only has a 'textChanged' signal
-        self.ui.crusade_notes_text.textChanged.connect(self.writeToRoster)
+        # NOTE: MAy need to restore writeToRoster block that was here
 
         # Set menus to their starting postions
         self.hideUnitSelectMenu()
@@ -72,9 +62,11 @@ class MainWindow(QMainWindow):
         self.ui.supply_used_line.clear()
         # Clear the contents of the table but keep the headers
         self.ui.unit_list_table.clearContents()
+        while self.ui.unit_list_table.rowCount() > 0:
+            self.ui.unit_list_table.removeRow(0)
         self.ui.crusade_notes_text.clear()
 
-    def writeToRoster(self):
+    def writeToActiveRoster(self):
         self.active_roster.roster_name = self.ui.roster_name_line.text()
         self.active_roster.roster_faction = self.ui.roster_faction_line.text()
         self.active_roster.roster_owner = self.ui.roster_owner_line.text()
@@ -87,7 +79,7 @@ class MainWindow(QMainWindow):
         # No need to do units here; by nature of how the addUnit method works,
         # The unit list is updated with every unit added 
          
-
+    # update each field to match the current values of "active_roster"
     def updateFields(self):
         self.ui.roster_name_line.setText(self.active_roster.roster_name)
         self.ui.roster_faction_line.setText(self.active_roster.roster_faction)
@@ -97,6 +89,11 @@ class MainWindow(QMainWindow):
         self.ui.req_points_line.setText(str(self.active_roster.roster_req_points))
         self.ui.supply_limit_line.setText(str(self.active_roster.roster_supply_limit))
         self.ui.supply_used_line.setText(str(self.active_roster.roster_supply_used))
+        # The unit table is handled in a separate method, 'updateUnitList'
+        self.ui.crusade_notes_text.setPlainText(self.active_roster.roster_notes)
+
+    
+    def updateUnitList(self):
         # Change the number of rows to match the number of units
         # in the active roster's unit list.
         self.ui.unit_list_table.clearContents()
@@ -109,7 +106,6 @@ class MainWindow(QMainWindow):
             self.ui.unit_list_table.setItem(current_row, 1, QTableWidgetItem(entry.power_level))
             self.ui.unit_list_table.setItem(current_row, 2, QTableWidgetItem(entry.crusade_points))
             current_row += 1
-        self.ui.crusade_notes_text.setPlainText(self.active_roster.roster_notes)
 
     def toggleMainMenu(self):
         # No matter the window size, don't want the menu to extend
@@ -165,8 +161,6 @@ class MainWindow(QMainWindow):
         # Get the faction ID from the first two (or three) letters of 
         # the "faction_combo_box" text
         current_selection = self.ui.faction_select_combo.currentText()
-        # TEST
-        print(current_selection)
         if current_selection[2] == " ":
             faction_id = self.ui.faction_select_combo.currentText()[:2]
         else:
@@ -187,7 +181,12 @@ class MainWindow(QMainWindow):
         unit_to_add = self.available_units[self.ui.unit_select_combo.currentIndex()]
         unit_to_add.crusade_points = 0
         self.active_roster.unit_list.append(unit_to_add)
-        self.updateFields()
+        self.updateUnitList()
+
+    def removeUnitFromRoster(self):
+        selected_unit = self.ui.unit_list_table.currentRow()
+        self.active_roster.unit_list.pop(selected_unit)
+        self.updateUnitList()
 
     # Load the roster data from a particular roster JSON
     # file and replace the current "active_roster" object. 
@@ -206,12 +205,15 @@ class MainWindow(QMainWindow):
                 # data from the JSON
                 temp_JSON = json.load(file_input)
                 self.active_roster.loadRosterFromJSON(temp_JSON)
-                self.clearFields()
-                self.updateFields()
+                print("At load, active roster's name is " + self.active_roster.roster_name)
+        self.clearFields()
+        self.updateFields()
+        self.updateUnitList()
 
-    # Save current roster to a JSON file, for use later.
+    # Save current roster to a JSON file, for later use or 
+    # sharing with other players.
     def saveRosterToJSONFile(self):
-        self.writeToRoster()
+        self.writeToActiveRoster()
         # Set parameters for PyQt File Dialog window
         save_dialog = QFileDialog.getSaveFileName(self, "Save File As...", "", "Roster files (*.ros);;All Files (*)")
         # If the dialog box opens, take the path that the user defines
@@ -223,6 +225,7 @@ class MainWindow(QMainWindow):
                 json.dump(temp_JSON, file_output)
         # Testing to follow
 
+    # Method used by the "Load Roster" button
     def loadRosterProcess(self):
         self.loadRosterFromJSONFile()
         self.clearFields()

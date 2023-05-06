@@ -89,15 +89,14 @@ class Roster:
             print("ERROR: Unit with that name already exists.")
     
     # Remove unit with the specified name from the list
-    # 'unit_to_remove' should be a string
+    # 'unit_to_remove' should be an int (the numerical index of
+    # the unit to remove 
     def removeUnit(self, unit_to_remove):
-        if self.findUnit(unit_to_remove) == True:
+        if unit_to_remove <= len(self.unit_list):
             # Lower power level of roster
-            self.roster_power -= unit_to_remove["power_level"]
+            self.roster_power -= self.unit_list[unit_to_remove].power_level
             # Remove unit from roster list
-            for x in self.unit_list:
-                if x["unit_title"] == unit_to_remove:
-                    self.unit_list.remove(x)
+            self.unit_list.pop(unit_to_remove)
 
     def printRoster(self):
         print(self.roster_name)
